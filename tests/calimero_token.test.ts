@@ -33,9 +33,7 @@ test(
 test(
   "CAT serde",
   () => {
-    const serialized = cat.serialize();
-    console.log(serialized);
-    const deserializedCat = CalimeroToken.deserialize(serialized);
+    const deserializedCat = CalimeroToken.deserialize(cat.serialize());
 
     expect(deserializedCat).toStrictEqual(cat);
   }

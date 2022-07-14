@@ -6,17 +6,31 @@ export const MAX_CALIMERO_TOKEN_DURATION = 1000 * 60 * 60 * 24 * 30;
 
 export class WalletData {
   accountId: string;
-  publicKey: string;
+  message: string;
+  blockId: string;
+  publicKey: Uint8Array;
   signature: string;
+  keyType: string;
 
-  constructor(accId: string, pubKey: string, sig: string) {
+  constructor(
+    accId: string,
+    message: string,
+    blockId: string,
+    pubKey: string,
+    sig: string,
+    keyType: string)
+  {
     this.accountId = accId;
-    this.publicKey = pubKey;
+    this.message = message;
+    this.blockId = blockId;
+    this.publicKey = new Uint8Array(Buffer.from(pubKey, "base64"));
     this.signature = sig;
+    this.keyType = keyType;
   }
 
   serialize(): string {
-    return this.accountId + ".." + this.publicKey + ".." + this.signature;
+    const arr = Object.values(this);
+    return arr.join("..");
   }
 
   static deserialize(serialized: string): WalletData {
@@ -24,39 +38,44 @@ export class WalletData {
     const wd = new WalletData(
       objects[0],
       objects[1],
-      objects[2]);
+      objects[2],
+      objects[3],
+      objects[4],
+      objects[5]);
     return wd;
   }
 }
 
 export class CalimeroTokenData {
-  accountId: string;
   shardId: string;
   from: Date;
   to: Date;
 
-  constructor(accountId: string,
+  constructor(
     shardId: string,
     from: Date = new Date(Date.now()),
-    to: Date = new Date(Date.now() + MAX_CALIMERO_TOKEN_DURATION)) {
-    this.accountId = accountId;
+    to: Date = new Date(Date.now() + MAX_CALIMERO_TOKEN_DURATION))
+  {
     this.shardId = shardId;
     this.from = from;
     this.to = to;
   }
 
   serialize(): string {
-    const ser = this.accountId + ".." + this.shardId + ".." + this.from.toISOString() + ".." + this.to.toISOString();
+    const ser = this.shardId + ".." + this.from.toISOString() + ".." + this.to.toISOString();
     return ser;
+  }
+
+  toHash(): string {
+    return sha256.update(this.serialize()).toString();
   }
 
   static deserialize(serialized: string): CalimeroTokenData {
     const objects = serialized.split("..");
     const ctd = new CalimeroTokenData(
       objects[0],
-      objects[1],
-      new Date(objects[2]),
-      new Date(objects[3]));
+      new Date(objects[1]),
+      new Date(objects[2]));
     return ctd;
   }
 
@@ -82,13 +101,23 @@ export class CalimeroToken {
   }
 
   isSignatureValid(): boolean {
+    const signedData = {
+      accountId: this.walletData.accountId,
+      message: this.walletData.message,
+      blockId: this.walletData.blockId,
+      publicKey: Buffer.from(this.walletData.publicKey).toString("base64"),
+      keyType: Number(this.walletData.keyType)
+    };
+    const encodedSignedData = JSON.stringify(signedData);
     // wallet signs sha256(msg), so we need to sha256() it again
-    const msg = new Uint8Array(sha256.update(this.tokenData.serialize()).arrayBuffer());
+    const msg = new Uint8Array(sha256.update(Buffer.from(encodedSignedData)).arrayBuffer());
     const sig = new Uint8Array(Buffer.from(
       this.walletData.signature,
       "base64"));
-    const pk = NearAPI.utils.PublicKey.fromString(this.walletData.publicKey);
-    return pk.verify(
+    // const pk = NearAPI.utils.PublicKey(this.walletData.publicKey);
+    const pk = new NearAPI.utils.PublicKey({keyType: 0, data: this.walletData.publicKey});
+    const trueMessage = this.tokenData.toHash() === this.walletData.message;
+    return trueMessage && pk.verify(
       msg,
       sig
     );

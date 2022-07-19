@@ -2,7 +2,7 @@ import { CalimeroToken, CalimeroTokenData, MAX_CALIMERO_TOKEN_DURATION, WalletDa
 
 const accountId = "caliauth.testnet";
 const shardId = "shard";
-const signature = "1EwPgI0ejQ7JClkP7vjCvJDVJEJwr64TQ8+9Z4pyAAAyVqlrKHjM1C8kUz9VEzMXcYSstSG8+/V0znIggpESCA==";
+const signature = "2+7SKP6qLX9hylq1okYqwISWI5xIrMkuRlOiglBHvdbcMUs8qYIgz5GbXadohbrSb4qtytWeiAQGUV1nYjTbAg==";
 const publicKey = "ed25519:FCbW55Vfk5vXVMY7wzARdP19G6xyhzHHq9xHn134wpwG";
 
 const catData = new CalimeroTokenData(

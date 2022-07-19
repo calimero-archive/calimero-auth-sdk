@@ -1,6 +1,6 @@
 {
   "name": "calimero-auth-sdk",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "main": "lib/index.js",
   "type": "commonjs",
   "types": "lib/index.d.ts",
@@ -9,7 +9,7 @@
     "start": "tsc && node .lib/index.js",
     "lint": "eslint . --ext .ts",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
-    "build": "tsc"
+    "build": "rm -rf lib && tsc"
   },
   "devDependencies": {
     "@types/bn.js": "^5.1.0",

@@ -8,7 +8,7 @@ export class WalletData {
   accountId: string;
   message: string;
   blockId: string;
-  publicKey: Uint8Array;
+  publicKey: string;
   signature: string;
   keyType: string;
 
@@ -23,7 +23,7 @@ export class WalletData {
     this.accountId = accId;
     this.message = message;
     this.blockId = blockId;
-    this.publicKey = new Uint8Array(Buffer.from(pubKey, "base64"));
+    this.publicKey = pubKey;
     this.signature = sig;
     this.keyType = keyType;
   }

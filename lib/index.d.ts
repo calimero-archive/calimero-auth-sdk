@@ -1,14 +1,12 @@
+import * as nearAPI from "near-api-js";
 export declare const MAX_CALIMERO_TOKEN_DURATION: number;
 export declare class WalletData {
     accountId: string;
     message: string;
     blockId: string;
-    publicKey: string;
-    signature: string;
-    keyType: string;
-    constructor(accId: string, message: string, blockId: string, pubKey: string, sig: string, keyType: string);
-    serialize(): string;
-    static deserialize(serialized: string): WalletData;
+    publicKey: nearAPI.utils.PublicKey;
+    signature: Uint8Array;
+    constructor(accId: string, message: string, blockId: string, pubKey: nearAPI.utils.PublicKey, sig: Uint8Array);
 }
 export declare class CalimeroTokenData {
     accountId: string;
@@ -16,9 +14,6 @@ export declare class CalimeroTokenData {
     from: Date;
     to: Date;
     constructor(accountId: string, shardId: string, from?: Date, to?: Date);
-    serialize(): string;
-    toHash(): string;
-    static deserialize(serialized: string): CalimeroTokenData;
     isDurationValid(): boolean;
 }
 export declare class CalimeroToken {
@@ -28,6 +23,4 @@ export declare class CalimeroToken {
     isDurationValid(): boolean;
     isSignatureValid(): boolean;
     verify(): boolean;
-    serialize(): string;
-    static deserialize(serializedToken: string): CalimeroToken;
 }

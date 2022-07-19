@@ -8,41 +8,21 @@ export class WalletData {
   accountId: string;
   message: string;
   blockId: string;
-  publicKey: string;
-  signature: string;
-  keyType: string;
+  publicKey: nearAPI.utils.PublicKey;
+  signature: Uint8Array;
 
   constructor(
     accId: string,
     message: string,
     blockId: string,
-    pubKey: string,
-    sig: string,
-    keyType: string)
+    pubKey: nearAPI.utils.PublicKey,
+    sig: Uint8Array)
   {
     this.accountId = accId;
     this.message = message;
     this.blockId = blockId;
     this.publicKey = pubKey;
     this.signature = sig;
-    this.keyType = keyType;
-  }
-
-  serialize(): string {
-    const arr = Object.values(this);
-    return arr.join("..");
-  }
-
-  static deserialize(serialized: string): WalletData {
-    const objects = serialized.split("..");
-    const wd = new WalletData(
-      objects[0],
-      objects[1],
-      objects[2],
-      objects[3],
-      objects[4],
-      objects[5]);
-    return wd;
   }
 }
 
@@ -62,25 +42,6 @@ export class CalimeroTokenData {
     this.shardId = shardId;
     this.from = from;
     this.to = to;
-  }
-
-  serialize(): string {
-    const ser = this.shardId + ".." + this.from.toISOString() + ".." + this.to.toISOString();
-    return ser;
-  }
-
-  toHash(): string {
-    return sha256.update(this.serialize()).toString();
-  }
-
-  static deserialize(serialized: string): CalimeroTokenData {
-    const objects = serialized.split("..");
-    const ctd = new CalimeroTokenData(
-      objects[0],
-      objects[1],
-      new Date(objects[1]),
-      new Date(objects[2]));
-    return ctd;
   }
 
   isDurationValid(): boolean {
@@ -109,47 +70,20 @@ export class CalimeroToken {
       accountId: this.walletData.accountId,
       message: this.walletData.message,
       blockId: this.walletData.blockId,
-      publicKey: this.walletData.publicKey,
-      keyType: this.walletData.keyType,
+      publicKey: Buffer.from(this.walletData.publicKey.data).toString('base64'),
+      keyType: this.walletData.publicKey.keyType,
     };
 
-    const encoded = JSON.stringify(data);
-    const msg = new Uint8Array(Buffer.from(sha256.update(Buffer.from(encoded)).arrayBuffer()));
-    const sig = new Uint8Array(Buffer.from(
+    const encodedSignedData = JSON.stringify(data);
+
+    return this.walletData.publicKey.verify(
+      new Uint8Array(sha256.update(Buffer.from(encodedSignedData)).arrayBuffer()),
       this.walletData.signature,
-      "base64"));
-    // const pk = nearAPI.utils.PublicKey(this.walletData.publicKey);
-    const pk = new nearAPI.utils.PublicKey({keyType: 0, data: this.walletData.publicKey});
-    const trueMessage = this.tokenData.toHash() === this.walletData.message;
-    return trueMessage && pk.verify(
-      msg,
-      sig
     );
   }
 
   verify(): boolean {
     return this.isDurationValid() && this.isSignatureValid();
-  }
-
-  serialize(): string {
-    return this.walletData.serialize() + "..." +  this.tokenData.serialize();
-  }
-
-  static deserialize(serializedToken: string): CalimeroToken {
-    const [walletDataString, tokenDataString] = serializedToken.split("...");
-
-    try {
-
-      const tokenData = CalimeroTokenData.deserialize(tokenDataString);
-      const walletData = WalletData.deserialize(walletDataString);
-
-      return new CalimeroToken(
-        walletData,
-        tokenData);
-    }
-    catch (e) {
-      throw Error("Scrambled token data");
-    }
   }
 }
 

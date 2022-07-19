@@ -1,5 +1,6 @@
-import * as NearAPI from "near-api-js";
 import { sha256 } from "js-sha256";
+
+const NearAPI = require("near-api-js");
 
 //Max valid period for a token would be 30 days
 export const MAX_CALIMERO_TOKEN_DURATION = 1000 * 60 * 60 * 24 * 30;

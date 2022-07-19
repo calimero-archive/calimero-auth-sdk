@@ -5,6 +5,9 @@
     "moduleResolution": "node",
     "esModuleInterop": true,
     "strict": true,
-    "outDir": ".build"
-  }
+    "outDir": "./lib"
+  },
+  "files": [
+    "./src/index.ts"
+  ]
 }

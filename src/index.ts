@@ -105,16 +105,8 @@ export class CalimeroToken {
   }
 
   isSignatureValid(): boolean {
-    const signedData = {
-      accountId: this.walletData.accountId,
-      message: this.walletData.message,
-      blockId: this.walletData.blockId,
-      publicKey: Buffer.from(this.walletData.publicKey).toString("base64"),
-      keyType: Number(this.walletData.keyType)
-    };
-    const encodedSignedData = JSON.stringify(signedData);
     // wallet signs sha256(msg), so we need to sha256() it again
-    const msg = new Uint8Array(sha256.update(Buffer.from(encodedSignedData)).arrayBuffer());
+    const msg = new Uint8Array(sha256.update(Buffer.from(this.walletData.message)).arrayBuffer());
     const sig = new Uint8Array(Buffer.from(
       this.walletData.signature,
       "base64"));

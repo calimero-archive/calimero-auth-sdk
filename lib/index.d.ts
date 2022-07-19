@@ -1,7 +1,5 @@
-declare const nearAPI: any;
-declare const sha256: any;
-declare const MAX_CALIMERO_TOKEN_DURATION: number;
-declare class WalletData {
+export declare const MAX_CALIMERO_TOKEN_DURATION: number;
+export declare class WalletData {
     accountId: string;
     message: string;
     blockId: string;
@@ -12,7 +10,7 @@ declare class WalletData {
     serialize(): string;
     static deserialize(serialized: string): WalletData;
 }
-declare class CalimeroTokenData {
+export declare class CalimeroTokenData {
     accountId: string;
     shardId: string;
     from: Date;
@@ -23,7 +21,7 @@ declare class CalimeroTokenData {
     static deserialize(serialized: string): CalimeroTokenData;
     isDurationValid(): boolean;
 }
-declare class CalimeroToken {
+export declare class CalimeroToken {
     walletData: WalletData;
     tokenData: CalimeroTokenData;
     constructor(walletData: WalletData, tokenData: CalimeroTokenData);

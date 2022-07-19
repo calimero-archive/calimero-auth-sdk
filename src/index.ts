@@ -2,9 +2,9 @@ const nearAPI = require("near-api-js");
 const sha256 = require("js-sha256");
 
 //Max valid period for a token would be 30 days
-const MAX_CALIMERO_TOKEN_DURATION = 1000 * 60 * 60 * 24 * 30;
+export const MAX_CALIMERO_TOKEN_DURATION = 1000 * 60 * 60 * 24 * 30;
 
-class WalletData {
+export class WalletData {
   accountId: string;
   message: string;
   blockId: string;
@@ -46,7 +46,7 @@ class WalletData {
   }
 }
 
-class CalimeroTokenData {
+export class CalimeroTokenData {
   accountId: string;
   shardId: string;
   from: Date;
@@ -91,7 +91,7 @@ class CalimeroTokenData {
   }
 }
 
-class CalimeroToken {
+export class CalimeroToken {
   walletData: WalletData;
   tokenData: CalimeroTokenData;
 

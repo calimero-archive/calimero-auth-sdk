@@ -8,7 +8,7 @@ export class WalletData {
     signature: string;
     keyType: string;
 
-    constructor(accId: string, message: string, blockId: string, pubKey: string, sig: string, keyType: string);
+    constructor(accId: string, message: string, blockId: string, pubKey: Uint8Array, sig: string, keyType: string);
     serialize(): string;
     static deserialize(serialized: string): WalletData;
 }
@@ -19,7 +19,7 @@ export class CalimeroTokenData {
     from: Date;
     to: Date;
 
-    constructor(accountId, shardId, from, to);
+    constructor(accountId: string, shardId: string, from: Date, to: Date);
     serialize(): string;
     static deserialize(serialized: string): CalimeroTokenData;
 

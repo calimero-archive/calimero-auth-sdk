@@ -1,11 +1,10 @@
-import { sha256 } from "js-sha256";
-
-const NearAPI = require("near-api-js");
+const nearAPI = require("near-api-js");
+const sha256 = require("js-sha256");
 
 //Max valid period for a token would be 30 days
-export const MAX_CALIMERO_TOKEN_DURATION = 1000 * 60 * 60 * 24 * 30;
+const MAX_CALIMERO_TOKEN_DURATION = 1000 * 60 * 60 * 24 * 30;
 
-export class WalletData {
+class WalletData {
   accountId: string;
   message: string;
   blockId: string;
@@ -47,7 +46,7 @@ export class WalletData {
   }
 }
 
-export class CalimeroTokenData {
+class CalimeroTokenData {
   accountId: string;
   shardId: string;
   from: Date;
@@ -92,7 +91,7 @@ export class CalimeroTokenData {
   }
 }
 
-export class CalimeroToken {
+class CalimeroToken {
   walletData: WalletData;
   tokenData: CalimeroTokenData;
 
@@ -119,8 +118,8 @@ export class CalimeroToken {
     const sig = new Uint8Array(Buffer.from(
       this.walletData.signature,
       "base64"));
-    // const pk = NearAPI.utils.PublicKey(this.walletData.publicKey);
-    const pk = new NearAPI.utils.PublicKey({keyType: 0, data: this.walletData.publicKey});
+    // const pk = nearAPI.utils.PublicKey(this.walletData.publicKey);
+    const pk = new nearAPI.utils.PublicKey({keyType: 0, data: this.walletData.publicKey});
     const trueMessage = this.tokenData.toHash() === this.walletData.message;
     return trueMessage && pk.verify(
       msg,

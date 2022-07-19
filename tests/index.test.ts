@@ -1,4 +1,4 @@
-import { CalimeroToken, CalimeroTokenData, MAX_CALIMERO_TOKEN_DURATION, WalletData } from "../calimero_token";
+import { CalimeroToken, CalimeroTokenData, MAX_CALIMERO_TOKEN_DURATION, WalletData } from "../lib";
 
 const accountId = "caliauth.testnet";
 const shardId = "shard";
@@ -13,8 +13,11 @@ const catData = new CalimeroTokenData(
 );
 const walletData = new WalletData(
   accountId,
+  "",
+  "",
   publicKey,
-  signature
+  signature,
+  ""
 );
 const cat = new CalimeroToken(
   walletData,

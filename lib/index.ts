@@ -47,15 +47,18 @@ export class WalletData {
 }
 
 export class CalimeroTokenData {
+  accountId: string;
   shardId: string;
   from: Date;
   to: Date;
 
   constructor(
+    accountId: string,
     shardId: string,
     from: Date = new Date(Date.now()),
     to: Date = new Date(Date.now() + MAX_CALIMERO_TOKEN_DURATION))
   {
+    this.accountId = accountId;
     this.shardId = shardId;
     this.from = from;
     this.to = to;
@@ -74,6 +77,7 @@ export class CalimeroTokenData {
     const objects = serialized.split("..");
     const ctd = new CalimeroTokenData(
       objects[0],
+      objects[1],
       new Date(objects[1]),
       new Date(objects[2]));
     return ctd;
@@ -148,3 +152,10 @@ export class CalimeroToken {
     }
   }
 }
+
+module.exports = {
+  MAX_CALIMERO_TOKEN_DURATION,
+  WalletData,
+  CalimeroToken,
+  CalimeroTokenData
+};

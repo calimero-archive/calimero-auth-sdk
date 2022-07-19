@@ -1,8 +1,8 @@
 {
-  "name": "caliauth",
-  "version": "0.0.0",
-  "description": "Builds the ",
-  "main": ".build/index.js",
+  "name": "calimero-auth-sdk",
+  "version": "0.2.2",
+  "main": "lib/index.ts",
+  "types": "lib/index.d.ts",
   "license": "MIT",
   "scripts": {
     "start": "tsc && node .build/index.js",
@@ -24,5 +24,8 @@
   },
   "dependencies": {
     "near-api-js": "^0.45.1"
-  }
+  },
+  "files": [
+    "lib"
+  ]
 }

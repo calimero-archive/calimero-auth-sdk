@@ -1,8 +1,8 @@
 {
   "name": "calimero-auth-sdk",
-  "version": "0.3.5",
+  "version": "0.3.8",
   "main": "lib/index.js",
-  "type": "module",
+  "type": "commonjs",
   "types": "lib/index.d.ts",
   "license": "MIT",
   "scripts": {

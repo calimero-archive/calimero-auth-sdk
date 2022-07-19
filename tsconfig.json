@@ -1,9 +1,13 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "esnext",
     "module": "commonjs",
+    "lib": [
+      "es2015",
+      "esnext",
+      "dom"
+    ],
     "declaration": true,
-    "emitDeclarationOnly": true,
     "moduleResolution": "node",
     "esModuleInterop": true,
     "strict": true,

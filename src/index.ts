@@ -114,7 +114,7 @@ export class CalimeroToken {
     };
 
     const encoded = JSON.stringify(data);
-    const msg = new Uint8Array(sha256.update(Buffer.from(encoded)).arrayBuffer());
+    const msg = new Uint8Array(Buffer.from(sha256.update(Buffer.from(encoded)).arrayBuffer()));
     const sig = new Uint8Array(Buffer.from(
       this.walletData.signature,
       "base64"));

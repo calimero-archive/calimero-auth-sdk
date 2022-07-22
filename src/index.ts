@@ -114,11 +114,6 @@ export class CalimeroAuth {
     const search = window.location.search;
     const params = new URLSearchParams(search);
 
-    if (params.get("message") !== localStorage.getItem("calimeroSecretHash")) {
-      console.log("Wallet Message is not the same as the calimeroSecretHash");
-      return;
-    }
-
     axios.post(
       config.authServiceUrl + "/api/v1/authenticate",
       {

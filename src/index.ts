@@ -93,13 +93,11 @@ export class CalimeroToken {
 }
 
 export class CalimeroAuth {
-  constructor() {}
-
-  isSignedIn(): boolean {
+  static isSignedIn(): boolean {
     return localStorage.getItem("calimeroToken") !== null;
   }
 
-  signIn(config: any) {
+  static signIn(config: any) {
     if (!localStorage.getItem("calimeroSecret")) {
       localStorage.setItem("calimeroSecret", uuidv4().toString());
       localStorage.setItem(
@@ -136,10 +134,11 @@ export class CalimeroAuth {
     }
   }
 
-  signOut() {
+  static signOut() {
     localStorage.removeItem("calimeroToken");
     localStorage.removeItem("calimeroSecret");
     localStorage.removeItem("calimeroSecretHash");
+    window.location.href = "/";
   }
 }
 

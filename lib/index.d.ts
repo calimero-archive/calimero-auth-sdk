@@ -25,8 +25,7 @@ export declare class CalimeroToken {
     verify(): boolean;
 }
 export declare class CalimeroAuth {
-    constructor();
-    isSignedIn(): boolean;
-    signIn(config: any): void;
-    signOut(): void;
+    static isSignedIn(): boolean;
+    static signIn(config: any): void;
+    static signOut(): void;
 }

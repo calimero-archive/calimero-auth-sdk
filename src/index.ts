@@ -109,32 +109,31 @@ export class CalimeroAuth {
 
       const callbackUrl = encodeURIComponent(window.location.href);
       window.location.href = `${config.walletUrl}?message=${localStorage.getItem("calimeroSecretHash")}&callbackUrl=${callbackUrl}`;
+    } else {
+      const search = window.location.search;
+      const params = new URLSearchParams(search);
+
+      axios.post(
+        config.authServiceUrl + "/api/v1/authenticate",
+        {
+          shardId: config.shardId,
+          accountId: params.get("accountId"),
+          blockId: params.get("blockId"),
+          publicKey: params.get("publicKey"),
+          signature: params.get("signature"),
+          calimeroSecret: localStorage.getItem("calimeroSecret"),
+          calimeroSecretHash: localStorage.getItem("calimeroSecretHash")
+        }
+      ).then((res: any) => {
+        if (res.status == 200) {
+          localStorage.setItem("calimeroToken", res.data.secretToken);
+          window.location.href = "/";
+        }
+      }).catch((err: any) => {
+        console.error(err);
+      });
+      
     }
-
-    const search = window.location.search;
-    const params = new URLSearchParams(search);
-
-    axios.post(
-      config.authServiceUrl + "/api/v1/authenticate",
-      {
-        shardId: config.shardId,
-        accountId: params.get("accountId"),
-        blockId: params.get("blockId"),
-        publicKey: params.get("publicKey"),
-        signature: params.get("signature"),
-        calimeroSecret: localStorage.getItem("calimeroSecret"),
-        calimeroSecretHash: localStorage.getItem("calimeroSecretHash")
-      }
-    ).then((res: any) => {
-      if (res.status == 200) {
-        localStorage.setItem("calimeroToken",
-          res.data.secretToken);
-      }
-    }).catch((err: any) => {
-      console.error(err);
-    });
-    
-    window.location.href = "/";
   }
 
   signOut() {

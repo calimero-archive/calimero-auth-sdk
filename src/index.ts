@@ -1,10 +1,14 @@
 import * as nearAPI from "near-api-js";
 import { sha256 } from "js-sha256";
 
-const axios = require("axios");
-import { v4 as uuidv4 } from 'uuid';
+import axios from "axios";
+import { v4 as uuidv4 } from "uuid";
 
 
+const MESSAGE_KEY = "calimeroSecret";
+const MESSAGE_HASH_KEY = "calimeroSecretHash";
+const AUTH_TOKEN_KEY = "calimeroToken";
+const CALIMERO_TOKEN_KEY = "caliToken";
 //Max valid period for a token would be 30 days
 export const MAX_CALIMERO_TOKEN_DURATION = 1000 * 60 * 60 * 24 * 30;
 
@@ -57,6 +61,12 @@ export class CalimeroTokenData {
   }
 }
 
+const clearLocalStorage = () => {
+  localStorage.removeItem(AUTH_TOKEN_KEY);
+  localStorage.removeItem(MESSAGE_KEY);
+  localStorage.removeItem(MESSAGE_HASH_KEY);
+}
+
 export class CalimeroToken {
   walletData: WalletData;
   tokenData: CalimeroTokenData;
@@ -92,52 +102,124 @@ export class CalimeroToken {
   }
 }
 
-export class CalimeroAuth {
-  static isSignedIn(): boolean {
-    return localStorage.getItem("calimeroToken") !== null;
+interface CalimeroConfig {
+  shardId: string,
+  calimeroUrl: string,
+  calimeroWebSdkService: string,
+  walletUrl: string,
+}
+
+export class CalimeroSdk {
+  private _config: CalimeroConfig;
+  
+  private constructor(config: CalimeroConfig) {
+    this._config = config;
   }
 
-  static signIn(config: any) {
-    if (!localStorage.getItem("calimeroSecret")) {
-      localStorage.setItem("calimeroSecret", uuidv4().toString());
-      localStorage.setItem(
-        "calimeroSecretHash",
-        sha256.update(localStorage.getItem("calimeroSecret") as string
-        ).toString());
+  static init(config: CalimeroConfig) {
+    return new CalimeroSdk(config);
+  }
 
-      const callbackUrl = encodeURIComponent(window.location.href);
-      window.location.href = `${config.walletUrl}?message=${localStorage.getItem("calimeroSecretHash")}&callbackUrl=${callbackUrl}`;
-    } else {
-      const search = window.location.search;
-      const params = new URLSearchParams(search);
+  isSignedIn(): boolean {
+    return localStorage.getItem(AUTH_TOKEN_KEY) !== null;
+  }
 
-      axios.post(
-        config.authServiceUrl + "/api/v1/authenticate",
-        {
-          shardId: config.shardId,
-          accountId: params.get("accountId"),
-          blockId: params.get("blockId"),
-          publicKey: params.get("publicKey"),
-          signature: params.get("signature"),
-          calimeroSecret: localStorage.getItem("calimeroSecret"),
-          calimeroSecretHash: localStorage.getItem("calimeroSecretHash")
-        }
-      ).then((res: any) => {
-        if (res.status == 200) {
-          localStorage.setItem("calimeroToken", res.data.secretToken);
-          window.location.href = "/";
-        }
-      }).catch((err: any) => {
-        console.error(err);
-      });
-      
+  signMessage = () => {
+    const message =  uuidv4().toString();
+    localStorage.setItem(MESSAGE_KEY,
+      message);
+    localStorage.setItem(
+      MESSAGE_HASH_KEY,
+      sha256.update(message ).toString()
+    );
+    const callbackUrl = encodeURIComponent(window.location.href);
+    window.location.href =
+        // eslint-disable-next-line max-len
+        `${this._config.walletUrl}/verify-owner?message=${localStorage.getItem(MESSAGE_HASH_KEY)}&callbackUrl=${callbackUrl}`;
+  }
+
+  authenticate = () => {
+    const search = window.location.search;
+    const params = new URLSearchParams(search);
+    const accountId = params.get("accountId");
+    const blockId = params.get("blockId");
+    const publicKey = params.get("publicKey");
+    const signature = params.get("signature");
+
+    if(!accountId || !blockId || !publicKey || !signature) {
+      clearLocalStorage();
+      console.error("Missing params");
+      return;
     }
+    axios.post(
+      this._config.calimeroUrl + "/api/v1/authenticate",
+      {
+        shardId: this._config.shardId,
+        accountId,
+        blockId,
+        publicKey,
+        signature,
+        calimeroSecret: localStorage.getItem(MESSAGE_KEY),
+        calimeroSecretHash: localStorage.getItem(MESSAGE_HASH_KEY)
+      }
+    ).then((res: any) => {
+      if (res.status == 200) {
+        console.log(res.data);
+        localStorage.setItem(AUTH_TOKEN_KEY,
+          res.data.secretToken);
+        console.log(JSON.stringify(res.data.calimeroToken));
+        localStorage.setItem(CALIMERO_TOKEN_KEY,
+          JSON.stringify(res.data.calimeroToken));
+        window.location.reload();
+      }
+    }).catch((err: any) => {
+      console.error(err);
+    });
   }
 
-  static signOut() {
-    localStorage.removeItem("calimeroToken");
-    localStorage.removeItem("calimeroSecret");
-    localStorage.removeItem("calimeroSecretHash");
+  signIn = () => (!localStorage.getItem(MESSAGE_KEY)) ? this.signMessage() : this.authenticate();
+
+  syncAccount = () => {
+    const url = 
+    `${this._config.calimeroWebSdkService}/api/v1/shards/${this._config.shardId}/wallet/api/v1/account/sync`;
+
+    axios.post(
+      url,
+      {
+        calimeroToken: localStorage.getItem(CALIMERO_TOKEN_KEY),
+        secretToken: localStorage.getItem(AUTH_TOKEN_KEY)
+      }
+    ).then((res: any) => {
+      if (res.status == 200) {
+        return true;
+      }
+    }).catch((err: any) => {
+      console.error(err);
+      return false;
+    });
+  }
+
+  signTransaction = (transactionString: string) => {
+    if(!this.isSignedIn) {
+      console.log("SignIn required before sign a transaction");
+      return;
+    }
+
+    const token = localStorage.getItem(AUTH_TOKEN_KEY);
+    //&callbackUrl=${encodeURIComponent(callbackUrl)}`;
+    const metaJson = {
+      calimeroRPCEndpoint: `${this._config.calimeroUrl}/api/v1/shards/${this._config.shardId}/neard-rpc`,
+      calimeroShardId: this._config.shardId,
+      calimeroAuthToken: token,
+    };
+    const meta = encodeURIComponent(JSON.stringify(metaJson));
+    window.location.href = 
+      // eslint-disable-next-line max-len 
+      `${this._config.walletUrl}/sign?transactions=${transactionString}#meta=${meta}`;
+  }
+
+  signOut = () => {
+    clearLocalStorage();
     window.location.href = "/";
   }
 }
@@ -147,5 +229,5 @@ module.exports = {
   WalletData,
   CalimeroToken,
   CalimeroTokenData,
-  CalimeroAuth
+  CalimeroSdk,
 };

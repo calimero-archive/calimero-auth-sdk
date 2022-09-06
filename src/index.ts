@@ -199,7 +199,7 @@ export class CalimeroSdk {
     });
   }
 
-  signTransaction = (transactionString: string) => {
+  signTransaction = (transactionString: string, callbackUrl: string) => {
     if(!this.isSignedIn) {
       console.log("SignIn required before sign a transaction");
       return;
@@ -213,9 +213,10 @@ export class CalimeroSdk {
       calimeroAuthToken: token,
     };
     const meta = encodeURIComponent(JSON.stringify(metaJson));
+    callbackUrl = encodeURIComponent(callbackUrl);
     window.location.href = 
       // eslint-disable-next-line max-len 
-      `${this._config.walletUrl}/sign?transactions=${transactionString}#meta=${meta}`;
+      `${this._config.walletUrl}/sign?transactions=${transactionString}&callbackUrl=${callbackUrl}#meta=${meta}`;
   }
 
   signOut = () => {

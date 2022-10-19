@@ -132,7 +132,7 @@ export class CalimeroSdk {
       MESSAGE_HASH_KEY,
       sha256.update(message ).toString()
     );
-    const callbackUrl = encodeURIComponent(window.location.href);
+    const callbackUrl = encodeURIComponent(`http://localhost:3000/accounts/sync/?shard=${this._config.shardId}&next=${window.location.href}&ogm=${message}`);
     window.location.href =
         // eslint-disable-next-line max-len
         `${this._config.walletUrl}/verify-owner?message=${localStorage.getItem(MESSAGE_HASH_KEY)}&callbackUrl=${callbackUrl}`;

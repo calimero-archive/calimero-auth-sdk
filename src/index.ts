@@ -57,8 +57,7 @@ export class CalimeroSdk {
 
   signTransaction = (transactionString: string, callbackUrl: string) => {
     if(!this.isSignedIn) {
-      window.alert("SignIn required before sign a transaction");
-      return;
+      return {error: "SignIn required before sign a transaction"};
     }
 
     const token = localStorage.getItem(AUTH_TOKEN_KEY);
@@ -81,33 +80,41 @@ export class CalimeroSdk {
 
   setCredentials = () =>  {
     if(window.location.hash) {
-      const decodedData = JSON.parse(decodeURIComponent(window.location.hash.substring(1)));
-      const walletData = JSON.parse(decodedData.calimeroToken).walletData;
-      const message = walletData.message;
-      const accountId = walletData.accountId;
-      const publicKey = walletData.publicKey.data.data;
-      const authToken = decodedData.secretToken;
-      const sentHash = localStorage.getItem(MESSAGE_HASH_KEY);
-     
-      if(message !== sentHash){
-        window.alert("Sent Message hash is not equal to receiver hash , please try again!");
-        return
-      }
+      try{
+        const decodedData = JSON.parse(decodeURIComponent(window.location.hash.substring(1)));
+        const walletData = JSON.parse(decodedData.calimeroToken).walletData;
+        const message = walletData.message;
+        const accountId = walletData.accountId;
+        const publicKey = walletData.publicKey.data.data;
+        const authToken = decodedData.secretToken;
+        const sentHash = localStorage.getItem(MESSAGE_HASH_KEY);
+        if(message !== sentHash){
+          throw new Error("Sent Message hash is not equal to receiver, please try again!");
+        }
 
-      localStorage.setItem(AUTH_TOKEN_KEY,
-        authToken);
-      localStorage.setItem(MESSAGE_KEY,
-        message);
-      localStorage.setItem(ACCOUNT_ID,
-        accountId);
-      localStorage.setItem(PUBLIC_KEY,
-        JSON.stringify(publicKey));
+        localStorage.setItem(AUTH_TOKEN_KEY,
+          authToken);
+        localStorage.setItem(MESSAGE_KEY,
+          message);
+        localStorage.setItem(ACCOUNT_ID,
+          accountId);
+        localStorage.setItem(PUBLIC_KEY,
+          JSON.stringify(publicKey));
+        this.confirmSignIn();
+        return {success: "Sign in confirmed!"};
+
+      }catch(error){
+        if (typeof error === "string") {
+          return {error: error.toUpperCase()}
+        } else if (error instanceof Error) {
+          return {error: error.message}
+        }
+      } 
     }
   }
 
   confirmSignIn = () => {
     if(window.location.hash){
-      this.setCredentials();
       window.location.replace(window.location.origin)
     }
   }

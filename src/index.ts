@@ -3,7 +3,7 @@ import { sha256 } from "js-sha256";
 import { v4 as uuidv4 } from "uuid";
 
 const AUTH_TOKEN_KEY = "calimeroToken";
-const MESSAGE_KEY = "calimeroSessage";
+const MESSAGE_KEY = "calimeroMessage";
 const MESSAGE_HASH_KEY = "calimeroSecretHash";
 
 const ACCOUNT_ID = "accountId";
@@ -15,18 +15,18 @@ const clearLocalStorage = () => {
   localStorage.removeItem(MESSAGE_HASH_KEY);
   localStorage.removeItem(ACCOUNT_ID);
   localStorage.removeItem(PUBLIC_KEY);
-}
+};
 
 interface CalimeroConfig {
-  shardId: string,
-  calimeroUrl: string,
-  calimeroWebSdkService: string,
-  walletUrl: string,
+  shardId: string;
+  calimeroUrl: string;
+  walletUrl: string;
+  calimeroWebSdkService: string;
 }
 
 export class CalimeroSdk {
   private _config: CalimeroConfig;
-  
+
   private constructor(config: CalimeroConfig) {
     this._config = config;
   }
@@ -40,24 +40,23 @@ export class CalimeroSdk {
   }
 
   signMessage = () => {
-    const message =  uuidv4().toString();
-    localStorage.setItem(
-      MESSAGE_HASH_KEY,
-      sha256.update(message ).toString()
-    );
-    //to do -> change http://localhost:3000 to calimeroUrl from calimeroSdK config file
+    const message = uuidv4().toString();
+    localStorage.setItem(MESSAGE_HASH_KEY, 
+      sha256.update(message ).toString());
+    const callbackUrl = encodeURIComponent(
     // eslint-disable-next-line max-len
-    const callbackUrl = encodeURIComponent(`http://localhost:3000/accounts/sync/?shard=${this._config.shardId}&next=${window.location.href}&ogm=${message}`);
+      `${this._config.calimeroWebSdkService}/accounts/sync/?shard=${this._config.shardId}&next=${window.location.href}&ogm=${message}`
+    );
     window.location.href =
-        // eslint-disable-next-line max-len
-        `${this._config.walletUrl}/verify-owner?message=${localStorage.getItem(MESSAGE_HASH_KEY)}&callbackUrl=${callbackUrl}`;
-  }
+      // eslint-disable-next-line max-len
+      `${this._config.walletUrl}/verify-owner?message=${localStorage.getItem(MESSAGE_HASH_KEY)}&callbackUrl=${callbackUrl}`;
+  };
 
-  signIn = () => (!localStorage.getItem(MESSAGE_KEY)) && this.signMessage();
+  signIn = () => !localStorage.getItem(MESSAGE_KEY) && this.signMessage();
 
   signTransaction = (transactionString: string, callbackUrl: string) => {
-    if(!this.isSignedIn) {
-      return {error: "SignIn required before sign a transaction"};
+    if (!this.isSignedIn) {
+      return { error: "SignIn required before sign a transaction" };
     }
 
     const token = localStorage.getItem(AUTH_TOKEN_KEY);
@@ -68,57 +67,58 @@ export class CalimeroSdk {
     };
     const meta = encodeURIComponent(JSON.stringify(metaJson));
     callbackUrl = encodeURIComponent(callbackUrl);
-    window.location.href = 
-      // eslint-disable-next-line max-len 
+    window.location.href =
+      // eslint-disable-next-line max-len
       `${this._config.walletUrl}/sign?transactions=${transactionString}&callbackUrl=${callbackUrl}#meta=${meta}`;
-  }
+  };
 
   signOut = () => {
     clearLocalStorage();
     window.location.href = "/";
-  }
+  };
 
-  setCredentials = () =>  {
-    if(window.location.hash) {
-      try{
-        const decodedData = JSON.parse(decodeURIComponent(window.location.hash.substring(1)));
+  setCredentials = () => {
+    if (window.location.hash) {
+      try {
+        const decodedData = JSON.parse(
+          decodeURIComponent(window.location.hash.substring(1))
+        );
         const walletData = JSON.parse(decodedData.calimeroToken).walletData;
         const message = walletData.message;
         const accountId = walletData.accountId;
         const publicKey = walletData.publicKey.data.data;
         const authToken = decodedData.secretToken;
         const sentHash = localStorage.getItem(MESSAGE_HASH_KEY);
-        if(message !== sentHash){
-          throw new Error("Sent Message hash is not equal to receiver, please try again!");
+        if (message !== sentHash) {
+          throw new Error(
+            "Sent Message hash is not equal to receiver, please try again!"
+          );
         }
 
-        localStorage.setItem(AUTH_TOKEN_KEY,
+        localStorage.setItem(AUTH_TOKEN_KEY, 
           authToken);
-        localStorage.setItem(MESSAGE_KEY,
+        localStorage.setItem(MESSAGE_KEY, 
           message);
-        localStorage.setItem(ACCOUNT_ID,
+        localStorage.setItem(ACCOUNT_ID, 
           accountId);
         localStorage.setItem(PUBLIC_KEY,
           JSON.stringify(publicKey));
         this.confirmSignIn();
-        return {success: "Sign in confirmed!"};
-
-      }catch(error){
+        return { success: "Sign in confirmed!" };
+      } catch (error) {
         if (typeof error === "string") {
-          return {error: error.toUpperCase()}
+          return { error: error.toUpperCase() };
         } else if (error instanceof Error) {
-          return {error: error.message}
+          return { error: error.message };
         }
-      } 
+      }
     }
-  }
-
+  };
   confirmSignIn = () => {
-    if(window.location.hash){
-      window.location.replace(window.location.origin)
+    if (window.location.hash) {
+      window.location.replace(window.location.origin+window.location.pathname);
     }
-  }
-
+  };
 }
 
 module.exports = {

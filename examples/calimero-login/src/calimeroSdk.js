@@ -1,8 +1,8 @@
 import { CalimeroSdk } from "calimero-auth-sdk";
 
 export default CalimeroSdk.init({
-    shardId: "slim-shardy-calimero-testnet",
-    walletUrl: "https://localhost:1234",
-    calimeroUrl: "https://api.development.calimero.network",
-    calimeroWebSdkService: "https://api.development.calimero.network",
+  shardId: process.env.REACT_APP_CALIMERO_SHARD_ID,
+  walletUrl: process.env.REACT_APP_WALLET_ENDPOINT_URL,
+  calimeroUrl: process.env.REACT_APP_CALIMERO_ENDPOINT_URL,
+  calimeroWebSdkService: process.env.REACT_APP_CALIMERO_WEB_SDK_SERVICE_URL,
 });

@@ -95,11 +95,11 @@ export class CalimeroSdk {
           );
         }
 
-        localStorage.setItem(AUTH_TOKEN_KEY, 
+        localStorage.setItem(AUTH_TOKEN_KEY,
           authToken);
-        localStorage.setItem(MESSAGE_KEY, 
+        localStorage.setItem(MESSAGE_KEY,
           message);
-        localStorage.setItem(ACCOUNT_ID, 
+        localStorage.setItem(ACCOUNT_ID,
           accountId);
         localStorage.setItem(PUBLIC_KEY,
           JSON.stringify(publicKey));

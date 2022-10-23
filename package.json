@@ -1,6 +1,6 @@
 {
-  "name": "calimero-auth-sdk",
-  "version": "0.7.5",
+  "name": "calimero-sdk",
+  "version": "0.0.1",
   "main": "lib/index.js",
   "type": "commonjs",
   "types": "lib/index.d.ts",

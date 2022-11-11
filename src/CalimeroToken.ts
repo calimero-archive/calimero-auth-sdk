@@ -1,5 +1,5 @@
-import * as nearAPI from "near-api-js";
 import { sha256 } from "js-sha256";
+import { PublicKey } from "near-api-js/lib/utils";
 
 export const MAX_CALIMERO_TOKEN_DURATION = 1000 * 60 * 60 * 24 * 30;
 
@@ -12,51 +12,47 @@ export class CalimeroToken {
     this.tokenData = tokenData;
   }
 
-  isDurationValid(): boolean {
-    return this.tokenData.isDurationValid();
-  }
+  isDurationValid = () => this.tokenData.isDurationValid();
 
-  isSignatureValid(): boolean {
-    const data = {
-      accountId: this.walletData.accountId,
-      message: this.walletData.message,
-      blockId: this.walletData.blockId,
-      publicKey: Buffer.from(this.walletData.publicKey.data).toString("base64"),
-      keyType: this.walletData.publicKey.keyType,
-    };
+  isSignatureValid = () => this.walletData.isSignatureValid()
 
-    const encodedSignedData = JSON.stringify(data);
-
-    return this.walletData.publicKey.verify(
-      new Uint8Array(sha256.update(Buffer.from(encodedSignedData)).arrayBuffer()),
-      this.walletData.signature,
-    );
-  }
-
-  verify(): boolean {
-    return this.isDurationValid() && this.isSignatureValid();
-  }
+  verify = () => this.isDurationValid() && this.isSignatureValid();
 }
 
 export class WalletData {
   accountId: string;
   message: string;
   blockId: string;
-  publicKey: nearAPI.utils.PublicKey;
+  publicKey: string;
   signature: Uint8Array;
 
   constructor(
-    accId: string,
+    accountId: string,
     message: string,
     blockId: string,
-    pubKey: nearAPI.utils.PublicKey,
-    sig: Uint8Array)
+    publicKey: string,
+    signature: string)
   {
-    this.accountId = accId;
+    this.accountId = accountId;
     this.message = message;
     this.blockId = blockId;
-    this.publicKey = pubKey;
-    this.signature = sig;
+    this.publicKey = publicKey;
+    this.signature = new Uint8Array(Buffer.from(signature, "base64"));
+  }
+
+  isSignatureValid(): boolean {
+    const data = {
+      accountId: this.accountId,
+      message: this.message,
+      blockId: this.blockId,
+      publicKey: this.publicKey,
+    };
+
+    const encodedSignedData = JSON.stringify(data);
+    return PublicKey.fromString(this.publicKey).verify(
+      new Uint8Array(sha256.array(encodedSignedData)),
+      this.signature,
+    );
   }
 }
 

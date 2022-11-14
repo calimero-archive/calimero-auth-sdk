@@ -1,11 +1,12 @@
+import BN from "bn.js";
 import { sha256 } from "js-sha256";
-
+import * as nearAPI from "near-api-js";
+import { InMemorySigner, KeyPair } from "near-api-js";
 import { v4 as uuidv4 } from "uuid";
-
+import { Buffer } from "buffer";
 const AUTH_TOKEN_KEY = "calimeroToken";
 const MESSAGE_KEY = "calimeroMessage";
 const MESSAGE_HASH_KEY = "calimeroSecretHash";
-
 const ACCOUNT_ID = "accountId";
 const PUBLIC_KEY = "publicKey";
 
@@ -84,9 +85,10 @@ export class CalimeroSdk {
           decodeURIComponent(window.location.hash.substring(1))
         );
         const walletData = JSON.parse(decodedData.calimeroToken).walletData;
+        console.log(walletData);
         const message = walletData.message;
         const accountId = walletData.accountId;
-        const publicKey = walletData.publicKey.data.data;
+        const publicKey = walletData.publicKey;
         const authToken = decodedData.secretToken;
         const sentHash = localStorage.getItem(MESSAGE_HASH_KEY);
         if (message !== sentHash) {
@@ -102,7 +104,7 @@ export class CalimeroSdk {
         localStorage.setItem(ACCOUNT_ID,
           accountId);
         localStorage.setItem(PUBLIC_KEY,
-          JSON.stringify(publicKey));
+          publicKey);
         this.confirmSignIn();
         return { success: "Sign in confirmed!" };
       } catch (error) {
@@ -119,6 +121,81 @@ export class CalimeroSdk {
       window.location.replace(window.location.origin+window.location.pathname);
     }
   };
+
+  addFunctionKey = async(contractAddress: string, method_names: string[], allowance: BN, xApiKey: string) => {
+    let sender;
+    let publicKey;
+    try{
+      sender = localStorage.getItem(ACCOUNT_ID);
+      publicKey = localStorage.getItem(PUBLIC_KEY);
+    }catch(error){
+      console.error(error);
+    }
+    const keyStore = new nearAPI.keyStores.BrowserLocalStorageKeyStore();
+    const calimeroConnection = await nearAPI.connect({
+      networkId: this._config.shardId,
+      keyStore: keyStore,
+      signer: new InMemorySigner(keyStore),
+      nodeUrl: `${this._config.calimeroUrl}/api/v1/shards/${this._config.shardId}/neard-rpc`,
+      walletUrl: this._config.walletUrl,
+      headers: {
+        "x-api-key": xApiKey,
+      },
+    });
+    const calimeroProvider = calimeroConnection.connection.provider;
+    const accessKey = await calimeroProvider.query({
+      request_type: "view_access_key",
+      finality: "final",
+      account_id: sender || "",
+      public_key: publicKey || "",
+    });
+    const blockHash = nearAPI.utils.serialize.base_decode(accessKey.block_hash);
+    // @ts-expect-error: Property 'nonce' does not exist on type 'QueryResponseKind'.
+    const nonce = ++accessKey.nonce + 1;
+    const newKeyPair = KeyPair.fromRandom("ed25519");
+    const keystore = new nearAPI.keyStores.BrowserLocalStorageKeyStore(
+      localStorage,
+      "competition:"
+    );
+    keystore.setKey("brt2-calimero-testnet",
+      sender || "",
+      newKeyPair);
+    const actions = [
+      nearAPI.transactions.addKey(
+        newKeyPair.getPublicKey(),
+        nearAPI.transactions.functionCallAccessKey(
+          contractAddress,
+          method_names,
+          allowance
+        )
+      ),
+    ];
+    const transaction = nearAPI.transactions.createTransaction(
+      sender || "",
+      newKeyPair.getPublicKey(),
+      sender || "",
+      nonce,
+      actions,
+      blockHash
+    );
+    let serializedTx;
+    try {
+      serializedTx = nearAPI.utils.serialize.serialize(
+        nearAPI.transactions.SCHEMA,
+        transaction
+      );
+    } catch (error) {
+      console.error(error);
+    }
+    try {
+      this.signTransaction(
+        encodeURIComponent(Buffer.from(serializedTx || "").toString("base64")),
+        window.location.href
+      );
+    } catch (error) {
+      console.error(error);
+    }
+  }
 }
 
 export * from "./CalimeroToken";

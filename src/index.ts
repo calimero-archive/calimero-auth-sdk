@@ -121,6 +121,4 @@ export class CalimeroSdk {
   };
 }
 
-module.exports = {
-  CalimeroSdk,
-};
+export * from "./CalimeroToken";

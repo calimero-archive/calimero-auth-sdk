@@ -39,6 +39,8 @@
     ]
   },
   "devDependencies": {
+    "buffer": "^6.0.3",
+    "react-app-rewired": "^2.2.1",
     "ts-jest": "^28.0.8"
   }
 }

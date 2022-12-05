@@ -1,24 +1,25 @@
-import {LIGHT_CLIENT_CONTRACT_PREFIX, CALIMERO_CONTRACT_SUFFIX} from "./Constants";
-import {Environment, environmentToContractNameInfix, Network, callViewMethod} from "./Utils";
+import {CALIMERO_CONTRACT_SUFFIX, LIGHT_CLIENT_CONTRACT_PREFIX} from "./Constants";
+import {callViewMethod, Chain, Environment, environmentToContractNameInfix, Network} from "./Utils";
+import {getConnectionInfo} from "./NetworkConfig";
 
 export class LightClient {
   shardName: string;
-  envInfix: string;
+  env: Environment;
   network: Network;
 
   constructor(shardName: string, env: Environment, network: Network)
   {
     this.shardName = shardName;
-    this.envInfix = environmentToContractNameInfix(env);
+    this.env = env;
     this.network = network;
   }
 
-  async getCurrentBlockHeight(): Promise<bigint> {
+  async getCurrentBlockHeight(chain: Chain, apiKey = ""): Promise<bigint> {
+    const connectionInfo = getConnectionInfo(chain, this.network, this.env, this.shardName, apiKey);
     const args = "{}";
-    const queryResponse = await callViewMethod(this.network,
-      LIGHT_CLIENT_CONTRACT_PREFIX + this.shardName + this.envInfix + CALIMERO_CONTRACT_SUFFIX,
-      "current_height",
-      args);
+    const envInfix = environmentToContractNameInfix(chain, this.env);
+    const contractId = LIGHT_CLIENT_CONTRACT_PREFIX + this.shardName + envInfix + CALIMERO_CONTRACT_SUFFIX;
+    const queryResponse = await callViewMethod(connectionInfo, contractId, "current_height", args);
 
     return JSON.parse(Buffer.from(queryResponse.result).toString());
   }

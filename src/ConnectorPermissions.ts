@@ -1,8 +1,7 @@
 import * as nearAPI from "near-api-js";
-import {KeyPair} from "near-api-js";
-import { Contract } from "near-api-js";
-import {Environment, Network, environmentToContractNameInfix, fetchAccount} from "./Utils";
-import { PERMISSIONS_CONTRACT_PREFIX, CALIMERO_CONTRACT_SUFFIX } from "./Constants";
+import {Contract, KeyPair} from "near-api-js";
+import {Chain, Environment, environmentToContractNameInfix, fetchAccount, Network} from "./Utils";
+import {CALIMERO_CONTRACT_SUFFIX, PERMISSIONS_CONTRACT_PREFIX} from "./Constants";
 
 export class ConnectorPermissions {
 
@@ -15,15 +14,19 @@ export class ConnectorPermissions {
     this.permissionsContract = permissionsContract;
   }
   
-  static async init(shardName: string,
+  static async init(
+    chain: Chain,
+    shardName: string,
     env: Environment,
     network: Network,
     accountId: string,
-    keyPair: KeyPair): Promise<ConnectorPermissions> {
+    keyPair: KeyPair,
+    apiKey = ""
+  ): Promise<ConnectorPermissions> {
 
-    const account = await fetchAccount(network, accountId, keyPair);
+    const account = await fetchAccount(chain, network, env, accountId, keyPair, shardName, apiKey);
 
-    const envInfix = environmentToContractNameInfix(env);
+    const envInfix = environmentToContractNameInfix(chain, env);
     const permissionsContract = new Contract(
       account,
       PERMISSIONS_CONTRACT_PREFIX + shardName + envInfix + CALIMERO_CONTRACT_SUFFIX,
@@ -33,8 +36,7 @@ export class ConnectorPermissions {
       }
     );
 
-    return new ConnectorPermissions(shardName,
-      permissionsContract);
+    return new ConnectorPermissions(shardName, permissionsContract);
   }
 
   async canBridge(accountId: string, connectorType: string): Promise<boolean> {

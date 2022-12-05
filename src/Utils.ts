@@ -1,10 +1,15 @@
 import * as nearAPI from "near-api-js";
 import {Account, KeyPair} from "near-api-js";
-import {getNearConfig, getRpcUrl} from "./NearConfig";
+import {getConnectionConfig, getNetworkId} from "./NetworkConfig";
 
 const { keyStores } = nearAPI;
 const { connect } = nearAPI;
 const {providers} = nearAPI;
+
+export enum Chain {
+  Near,
+  Calimero,
+}
 
 export enum Environment {
     Development,
@@ -12,9 +17,11 @@ export enum Environment {
     Production,
 }
 
-export function environmentToContractNameInfix(env: Environment): string {
-  if (env === Environment.Development) return ".dev";
-  if (env === Environment.Staging) return ".stage";
+export function environmentToContractNameInfix(chain: Chain, env: Environment): string {
+  if (chain === Chain.Near) {
+    if (env === Environment.Development) return ".dev";
+    if (env === Environment.Staging) return ".stage";
+  }
   return "";
 }
 
@@ -23,35 +30,35 @@ export enum Network {
     Mainnet,
 }
 
-export function getNetworkId(network: Network) {
-  if (network === Network.Testnet) return "testnet";
-  if (network === Network.Mainnet) return "mainnet";
-  return "";
-}
+export async function fetchAccount(
+  chain: Chain,
+  network: Network,
+  env: Environment,
+  accountId: string,
+  keyPair: KeyPair,
+  shardName = "",
+  apiKey = ""
+): Promise<Account> {
 
-export async function fetchAccount(network: Network, accountId: string, keyPair: KeyPair): Promise<Account> {
-  const networkId = getNetworkId(network);
+  const networkId = getNetworkId(chain, network, shardName);
   const myKeyStore = new keyStores.InMemoryKeyStore();
-  await myKeyStore.setKey(networkId,
-    accountId,
-    keyPair);
+  await myKeyStore.setKey(networkId, accountId, keyPair);
 
   const connectionConfig = {
-    ...getNearConfig(network),
+    ...getConnectionConfig(chain, network, env, shardName, apiKey),
     keyStore: myKeyStore,
   };
   const nearConnection = await connect(connectionConfig);
   return await nearConnection.account(accountId);
 }
 
-export async function callViewMethod(network: Network,
+export async function callViewMethod(
+  connectionInfo: any,
   contractId: string,
   methodName: string,
   args: string): Promise<any> {
 
-  const connectionInfo = { url: getRpcUrl(network) };
   const provider = new providers.JsonRpcProvider(connectionInfo);
-
   const encodedArgs = Buffer.from(args).toString("base64");
 
   return await provider.query({

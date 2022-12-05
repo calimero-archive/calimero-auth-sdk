@@ -1,27 +1,31 @@
 import {Contract, KeyPair} from "near-api-js";
 import {CALIMERO_CONTRACT_SUFFIX, NFT_CONNECTOR_CONTRACT_PREFIX} from "./Constants";
-import {Environment, Network, environmentToContractNameInfix, fetchAccount} from "./Utils";
+import {Chain, Environment, environmentToContractNameInfix, fetchAccount, Network} from "./Utils";
 
 export class NftClient {
 
   shardName: string;
-  envInfix: string;
+  env: Environment;
   network: Network;
+  apiKey: string;
 
-  constructor(shardName: string, env: Environment, network: Network)
+  constructor(shardName: string, env: Environment, network: Network, apiKey = "")
   {
     this.shardName = shardName;
-    this.envInfix = environmentToContractNameInfix(env);
+    this.env = env;
     this.network = network;
+    this.apiKey = apiKey;
   }
 
-  async nftTransferCall(accountId: string,
+  async nftTransferCall(
+    chain: Chain,
+    accountId: string,
     keyPair: KeyPair,
     contractId: string,
-    tokenId: string): Promise<boolean> {
+    tokenId: string
+  ): Promise<boolean> {
 
-    const account = await fetchAccount(this.network, accountId, keyPair);
-
+    const account = await fetchAccount(chain, this.network, this.env, accountId, keyPair, this.shardName);
     const contract = new Contract(
       account,
       contractId,
@@ -31,13 +35,15 @@ export class NftClient {
       }
     );
 
+    const envInfix = environmentToContractNameInfix(chain, this.env);
+
     const MAX_GAS = 300000000000000;
     const YOCTO_NEAR_AMOUNT = 1;
     try {
       // @ts-ignore
       const result = await contract.nft_transfer_call(
         {
-          receiver_id: NFT_CONNECTOR_CONTRACT_PREFIX + this.shardName + this.envInfix + CALIMERO_CONTRACT_SUFFIX,
+          receiver_id: NFT_CONNECTOR_CONTRACT_PREFIX + this.shardName + envInfix + CALIMERO_CONTRACT_SUFFIX,
           token_id: tokenId,
           msg: this.shardName + CALIMERO_CONTRACT_SUFFIX,
         },
@@ -49,6 +55,34 @@ export class NftClient {
     } catch (error) {
       console.log(error);
       return false;
+    }
+  }
+
+  async withdraw(chain: Chain, accountId: string, keyPair: KeyPair, contractId: string, tokenId: string) {
+    const account = await fetchAccount(chain, this.network, this.env, accountId, keyPair, this.shardName, this.apiKey);
+
+    const contract = new Contract(
+      account,
+      contractId,
+      {
+        viewMethods: [],
+        changeMethods: ["withdraw"],
+      }
+    );
+    const MAX_GAS = 300000000000000;
+    const YOCTO_NEAR_AMOUNT = 1;
+
+    try {
+      // @ts-ignore
+      await contract.withdraw(
+        {
+          token_id: tokenId,
+        },
+        MAX_GAS,
+        YOCTO_NEAR_AMOUNT,
+      );
+    } catch (error) {
+      console.log(error);
     }
   }
 }

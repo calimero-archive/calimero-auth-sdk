@@ -40,20 +40,21 @@ export class CalimeroSdk {
     return localStorage.getItem(AUTH_TOKEN_KEY) !== null;
   }
 
-  signMessage = () => {
+  signMessage = (callbackUrl: string) => {
+    callbackUrl = typeof callbackUrl === "string" ? callbackUrl : window.location.href;
     const message = uuidv4().toString();
     localStorage.setItem(MESSAGE_HASH_KEY, 
       sha256.update(message ).toString());
-    const callbackUrl = encodeURIComponent(
+    const callbackUrlEncoded = encodeURIComponent(
     // eslint-disable-next-line max-len
-      `${this._config.calimeroWebSdkService}/accounts/sync/?shard=${this._config.shardId}&next=${window.location.href}&ogm=${message}`
+      `${this._config.calimeroWebSdkService}/accounts/sync/?shard=${this._config.shardId}&next=${callbackUrl}&ogm=${message}`
     );
     window.location.href =
       // eslint-disable-next-line max-len
-      `${this._config.walletUrl}/verify-owner?message=${localStorage.getItem(MESSAGE_HASH_KEY)}&callbackUrl=${callbackUrl}`;
+      `${this._config.walletUrl}/verify-owner?message=${localStorage.getItem(MESSAGE_HASH_KEY)}&callbackUrl=${callbackUrlEncoded}`;
   };
 
-  signIn = () => !localStorage.getItem(MESSAGE_KEY) && this.signMessage();
+  signIn = (callbackUrl : string) => !localStorage.getItem(MESSAGE_KEY) && this.signMessage(callbackUrl);
 
   signTransaction = (transactionString: string, callbackUrl: string) => {
     if (!this.isSignedIn) {

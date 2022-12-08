@@ -1,24 +1,55 @@
-import {callViewMethod, Network} from "./Utils";
+import {callViewMethod, Chain, Environment, Network} from "./Utils";
+import {getConnectionInfo} from "./NetworkConfig";
 
 export class BalanceClient {
 
-  static async ftBalanceOfOnNear(network: Network, contractId: string, accountId: string): Promise<number> {
-    const args = `{ "account_id": "${accountId}" }`;
-    const queryResponse = await callViewMethod(network, contractId, "ft_balance_of", args);
+  static async ftBalanceOf(
+    chain: Chain,
+    network: Network,
+    env: Environment,
+    contractId: string,
+    accountId: string,
+    shardName = "",
+    apiKey = ""
+  ): Promise<number> {
 
+    const connectionInfo = getConnectionInfo(chain, network, env, shardName, apiKey);
+    const args = `{ "account_id": "${accountId}" }`;
+    const queryResponse = await callViewMethod(connectionInfo, contractId, "ft_balance_of", args);
+    
     return JSON.parse(Buffer.from(queryResponse.result).toString());
   }
 
-  static async getNftOwnerId(network: Network, contractId: string, tokenId: string): Promise<string> {
+  static async getNftOwnerId(
+    chain: Chain,
+    network: Network,
+    env: Environment,
+    contractId: string,
+    tokenId: string,
+    shardName = "",
+    apiKey = ""
+  ): Promise<string> {
+
+    const connectionInfo = getConnectionInfo(chain, network, env, shardName, apiKey);
     const args = `{ "token_id": "${tokenId}" }`;
-    const queryResponse = await callViewMethod(network, contractId, "nft_token", args);
+    const queryResponse = await callViewMethod(connectionInfo, contractId, "nft_token", args);
 
     return JSON.parse(Buffer.from(queryResponse.result).toString()).owner_id;
   }
 
-  static async getNftTokensForOwner(network: Network, contractId: string, accountId: string): Promise<any[]> {
+  static async getNftTokensForOwner(
+    chain: Chain,
+    network: Network,
+    env: Environment,
+    contractId: string,
+    accountId: string,
+    shardName = "",
+    apiKey = ""
+  ): Promise<any[]> {
+
+    const connectionInfo = getConnectionInfo(chain, network, env, shardName, apiKey);
     const args = `{ "account_id": "${accountId}" }`;
-    const queryResponse = await callViewMethod(network, contractId, "nft_tokens_for_owner", args);
+    const queryResponse = await callViewMethod(connectionInfo, contractId, "nft_tokens_for_owner", args);
 
     return JSON.parse(Buffer.from(queryResponse.result).toString());
   }

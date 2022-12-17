@@ -24,8 +24,7 @@ export class Bridge {
   async ftBalanceOf(
     chain: Chain,
     contractId: string,
-    accountId: string,
-    apiKey = ""
+    accountId: string
   ): Promise<number> {
     return await BalanceClient.ftBalanceOf(
       chain,
@@ -34,15 +33,14 @@ export class Bridge {
       contractId,
       accountId,
       this.shardName,
-      apiKey
+      this.apiKey
     );
   }
 
   async getNftOwnerId(
     chain: Chain,
     contractId: string,
-    tokenId: string,
-    apiKey = ""
+    tokenId: string
   ): Promise<string> {
     return await BalanceClient.getNftOwnerId(
       chain,
@@ -51,15 +49,14 @@ export class Bridge {
       contractId,
       tokenId,
       this.shardName,
-      apiKey
+      this.apiKey
     )
   }
 
   async getNftTokensForOwner(
     chain: Chain,
     contractId: string,
-    accountId: string,
-    apiKey = ""
+    accountId: string
   ): Promise<any[]> {
     return await BalanceClient.getNftTokensForOwner(
       chain,
@@ -68,7 +65,7 @@ export class Bridge {
       contractId,
       accountId,
       this.shardName,
-      apiKey
+      this.apiKey
     )
   }
 

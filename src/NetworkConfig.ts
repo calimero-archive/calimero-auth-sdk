@@ -1,4 +1,4 @@
-import {Chain, Environment, Network} from "./Utils";
+import {ChainType, Environment, NetworkType} from "./Utils";
 import {
   CALIMERO_NETWORK_SUFFIX, CALIMERO_RPC_NODE_SUFFIX,
   CALIMERO_RPC_NODE_URL_DEV,
@@ -29,30 +29,30 @@ export const nearConfigMainnet = {
 };
 
 export function getConnectionConfig(
-  chain: Chain,
-  network: Network,
+  chain: ChainType,
+  network: NetworkType,
   env: Environment,
   shardName = "",
   apiKey = ""
 ): any {
 
-  if (chain === Chain.Near) {
+  if (chain === ChainType.NEAR) {
     return getNearConfig(network);
   }
-  if (chain === Chain.Calimero) {
+  if (chain === ChainType.CALIMERO) {
     return getCalimeroConfig(network, env, shardName, apiKey);
   }
   return null;
 }
 
-export function getNearConfig(network: Network): any {
-  if (network === Network.Testnet) return nearConfigTestnet;
-  if (network === Network.Mainnet) return nearConfigMainnet;
+export function getNearConfig(network: NetworkType): any {
+  if (network === NetworkType.TESTNET) return nearConfigTestnet;
+  if (network === NetworkType.MAINNET) return nearConfigMainnet;
   return null;
 }
 
-export function getCalimeroConfig(network: Network, env: Environment, shardName: string, apiKey: string): any {
-  const networkId = getNetworkId(Chain.Calimero, network, shardName);
+export function getCalimeroConfig(network: NetworkType, env: Environment, shardName: string, apiKey: string): any {
+  const networkId = getNetworkId(ChainType.CALIMERO, network, shardName);
   return {
     networkId: networkId,
     nodeUrl: getCalimeroRpcUrl(network, env, shardName),
@@ -62,36 +62,36 @@ export function getCalimeroConfig(network: Network, env: Environment, shardName:
   };
 }
 
-export function getNearRpcUrl(network: Network): string {
+export function getNearRpcUrl(network: NetworkType): string {
   return getNearConfig(network).nodeUrl;
 }
 
-export function getCalimeroRpcUrl(network: Network, env: Environment, shardName: string): string {
-  const networkId = getNetworkId(Chain.Calimero, network, shardName);
-  if (env === Environment.Development) {
+export function getCalimeroRpcUrl(network: NetworkType, env: Environment, shardName: string): string {
+  const networkId = getNetworkId(ChainType.CALIMERO, network, shardName);
+  if (env === Environment.DEVELOPMENT) {
     return CALIMERO_RPC_NODE_URL_DEV + networkId + CALIMERO_RPC_NODE_SUFFIX;
   }
-  if (env === Environment.Staging) {
+  if (env === Environment.STAGING) {
     return CALIMERO_RPC_NODE_URL_STAGE + networkId + CALIMERO_RPC_NODE_SUFFIX;
   }
-  if (env === Environment.Production) {
+  if (env === Environment.PRODUCTION) {
     return CALIMERO_RPC_NODE_URL_PROD + networkId + CALIMERO_RPC_NODE_SUFFIX;
   }
   return "";
 }
 
 export function getConnectionInfo(
-  chain: Chain,
-  network: Network,
+  chain: ChainType,
+  network: NetworkType,
   env: Environment,
   shardName: string,
   apiKey: string
 ): any {
 
-  if (chain === Chain.Near) {
+  if (chain === ChainType.NEAR) {
     return { url: getNearRpcUrl(network) };
   }
-  if (chain === Chain.Calimero) {
+  if (chain === ChainType.CALIMERO) {
     return {
       url: getCalimeroRpcUrl(network, env, shardName),
       headers: {
@@ -102,14 +102,14 @@ export function getConnectionInfo(
   return null;
 }
 
-export function getNetworkId(chain: Chain, network: Network, shardName = ""): string {
-  if (chain === Chain.Near) {
-    if (network === Network.Testnet) return TESTNET_NETWORK_ID;
-    if (network === Network.Mainnet) return MAINNET_NETWORK_ID;
+export function getNetworkId(chain: ChainType, network: NetworkType, shardName = ""): string {
+  if (chain === ChainType.NEAR) {
+    if (network === NetworkType.TESTNET) return TESTNET_NETWORK_ID;
+    if (network === NetworkType.MAINNET) return MAINNET_NETWORK_ID;
   }
-  if (chain === Chain.Calimero) {
-    if (network === Network.Testnet) return shardName + CALIMERO_NETWORK_SUFFIX + TESTNET_NETWORK_SUFFIX;
-    if (network === Network.Mainnet) return shardName + CALIMERO_NETWORK_SUFFIX + MAINNET_NETWORK_SUFFIX;
+  if (chain === ChainType.CALIMERO) {
+    if (network === NetworkType.TESTNET) return shardName + CALIMERO_NETWORK_SUFFIX + TESTNET_NETWORK_SUFFIX;
+    if (network === NetworkType.MAINNET) return shardName + CALIMERO_NETWORK_SUFFIX + MAINNET_NETWORK_SUFFIX;
   }
   return "";
 }

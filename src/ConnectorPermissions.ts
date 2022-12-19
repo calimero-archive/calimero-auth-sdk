@@ -1,13 +1,13 @@
 import {Contract, KeyPair} from "near-api-js";
 import {
   callViewMethod,
-  Chain,
+  ChainType,
   ConnectorType,
   connectorTypeToString,
   Environment,
   environmentToContractNameInfix,
   fetchAccount,
-  Network
+  NetworkType
 } from "./Utils";
 import {CALIMERO_CONTRACT_SUFFIX, PERMISSIONS_CONTRACT_PREFIX} from "./Constants";
 import {getConnectionInfo} from "./NetworkConfig";
@@ -24,10 +24,10 @@ export class ConnectorPermissions {
   }
 
   static async initForViewMethods(
-    chain: Chain,
+    chain: ChainType,
     shardName: string,
     env: Environment,
-    network: Network,
+    network: NetworkType,
     apiKey = ""
   ): Promise<ConnectorPermissions> {
     const envInfix = environmentToContractNameInfix(chain, env);
@@ -40,10 +40,10 @@ export class ConnectorPermissions {
   }
   
   static async initForChangeMethods(
-    chain: Chain,
+    chain: ChainType,
     shardName: string,
     env: Environment,
-    network: Network,
+    network: NetworkType,
     accountId: string,
     keyPair: KeyPair,
     apiKey = ""

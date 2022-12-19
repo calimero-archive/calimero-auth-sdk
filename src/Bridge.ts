@@ -1,4 +1,4 @@
-import {Chain, ConnectorType, Environment, Network} from "./Utils";
+import {ChainType, ConnectorType, Environment, NetworkType} from "./Utils";
 import {BalanceClient} from "./BalanceClient";
 import {KeyPair} from "near-api-js";
 import {ConnectorPermissions} from "./ConnectorPermissions";
@@ -10,10 +10,10 @@ export class Bridge {
 
   shardName: string;
   env: Environment;
-  network: Network;
+  network: NetworkType;
   apiKey: string;
 
-  constructor(shardName: string, env: Environment, network: Network, apiKey = "")
+  constructor(shardName: string, env: Environment, network: NetworkType, apiKey = "")
   {
     this.shardName = shardName;
     this.env = env;
@@ -22,7 +22,7 @@ export class Bridge {
   }
 
   async ftBalanceOf(
-    chain: Chain,
+    chain: ChainType,
     contractId: string,
     accountId: string
   ): Promise<number> {
@@ -38,7 +38,7 @@ export class Bridge {
   }
 
   async getNftOwnerId(
-    chain: Chain,
+    chain: ChainType,
     contractId: string,
     tokenId: string
   ): Promise<string> {
@@ -54,7 +54,7 @@ export class Bridge {
   }
 
   async getNftTokensForOwner(
-    chain: Chain,
+    chain: ChainType,
     contractId: string,
     accountId: string
   ): Promise<any[]> {
@@ -69,13 +69,13 @@ export class Bridge {
     )
   }
 
-  async getCurrentBlockHeight(chain: Chain): Promise<bigint> {
+  async getCurrentBlockHeight(chain: ChainType): Promise<bigint> {
     const lightClient = new LightClient(this.shardName, this.env, this.network);
     return await lightClient.getCurrentBlockHeight(chain, this.apiKey);
   }
 
   async canBridge(
-    chain: Chain,
+    chain: ChainType,
     accountId: string,
     connectorType: ConnectorType
   ): Promise<boolean> {
@@ -91,7 +91,7 @@ export class Bridge {
   }
 
   async getAllowRegexRules(
-    chain: Chain,
+    chain: ChainType,
     connectorType: ConnectorType
   ): Promise<string[]> {
     const permissionsContract = await ConnectorPermissions.initForViewMethods(
@@ -106,7 +106,7 @@ export class Bridge {
   }
 
   async addAllowRegexRule(
-    chain: Chain,
+    chain: ChainType,
     signerAccountId: string,
     signerKeyPair: KeyPair,
     regexRule: string,
@@ -126,7 +126,7 @@ export class Bridge {
   }
 
   async removeAllowedRegexRule(
-    chain: Chain,
+    chain: ChainType,
     signerAccountId: string,
     signerKeyPair: KeyPair,
     regexRule: string,
@@ -146,7 +146,7 @@ export class Bridge {
   }
 
   async denyCrossShardCallPerContract(
-    chain: Chain,
+    chain: ChainType,
     signerAccountId: string,
     signerKeyPair: KeyPair,
     accountRegex: string,
@@ -166,7 +166,7 @@ export class Bridge {
   }
 
   async removeDeniedCrossShardCallPerContract(
-    chain: Chain,
+    chain: ChainType,
     signerAccountId: string,
     signerKeyPair: KeyPair,
     accountRegex: string,
@@ -186,7 +186,7 @@ export class Bridge {
   }
 
   async canMakeCrossShardCallForContract(
-    chain: Chain,
+    chain: ChainType,
     accountId: string,
     contractId: string
   ): Promise<boolean> {
@@ -201,7 +201,7 @@ export class Bridge {
     return await permissionsContract.canMakeCrossShardCallForContract(accountId, contractId);
   }
 
-  async getRegexAccountPerContractForXsc(chain: Chain): Promise<[string, string][]> {
+  async getRegexAccountPerContractForXsc(chain: ChainType): Promise<[string, string][]> {
     const permissionsContract = await ConnectorPermissions.initForViewMethods(
       chain,
       this.shardName,
@@ -213,34 +213,34 @@ export class Bridge {
     return await permissionsContract.getRegexAccountPerContractForXsc();
   }
 
-  async ftTransferCall(
-    chain: Chain,
+  async ftBridge(
+    chain: ChainType,
     accountId: string,
     keyPair: KeyPair,
     contractId: string,
     amount: number
   ): Promise<number> {
     const ftClient = new FtClient(this.shardName, this.env, this.network, this.apiKey);
-    return await ftClient.ftTransferCall(chain, accountId, keyPair, contractId, amount);
+    return await ftClient.ftBridge(chain, accountId, keyPair, contractId, amount);
   }
 
-  async ftWithdraw(chain: Chain, accountId: string, keyPair: KeyPair, contractId: string, amount: number) {
+  async ftWithdraw(chain: ChainType, accountId: string, keyPair: KeyPair, contractId: string, amount: number) {
     const ftClient = new FtClient(this.shardName, this.env, this.network, this.apiKey);
     return await ftClient.withdraw(chain, accountId, keyPair, contractId, amount);
   }
 
-  async nftTransferCall(
-    chain: Chain,
+  async nftBridge(
+    chain: ChainType,
     accountId: string,
     keyPair: KeyPair,
     contractId: string,
     tokenId: string
   ): Promise<boolean> {
     const nftClient = new NftClient(this.shardName, this.env, this.network, this.apiKey);
-    return await nftClient.nftTransferCall(chain, accountId, keyPair, contractId, tokenId);
+    return await nftClient.nftBridge(chain, accountId, keyPair, contractId, tokenId);
   }
 
-  async nftWithdraw(chain: Chain, accountId: string, keyPair: KeyPair, contractId: string, tokenId: string) {
+  async nftWithdraw(chain: ChainType, accountId: string, keyPair: KeyPair, contractId: string, tokenId: string) {
     const nftClient = new NftClient(this.shardName, this.env, this.network, this.apiKey);
     return await nftClient.withdraw(chain, accountId, keyPair, contractId, tokenId);
   }

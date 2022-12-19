@@ -1,6 +1,6 @@
 import * as nearAPI from "near-api-js";
 import {KeyPair} from "near-api-js";
-import {Chain, Environment, environmentToContractNameInfix, fetchAccount, Network} from "./Utils";
+import {ChainType, Environment, environmentToContractNameInfix, fetchAccount, NetworkType} from "./Utils";
 import {CALIMERO_CONTRACT_SUFFIX, FT_CONNECTOR_CONTRACT_PREFIX} from "./Constants";
 
 const { Contract } = nearAPI;
@@ -8,10 +8,10 @@ const { Contract } = nearAPI;
 export class FtClient {
   shardName: string;
   env: Environment;
-  network: Network;
+  network: NetworkType;
   apiKey: string;
 
-  constructor(shardName: string, env: Environment, network: Network, apiKey = "")
+  constructor(shardName: string, env: Environment, network: NetworkType, apiKey = "")
   {
     this.shardName = shardName;
     this.env = env;
@@ -19,8 +19,8 @@ export class FtClient {
     this.apiKey = apiKey;
   }
 
-  async ftTransferCall(
-    chain: Chain,
+  async ftBridge(
+    chain: ChainType,
     accountId: string,
     keyPair: KeyPair,
     contractId: string,
@@ -60,7 +60,7 @@ export class FtClient {
     return 0;
   }
 
-  async withdraw(chain: Chain, accountId: string, keyPair: KeyPair, contractId: string, amount: number) {
+  async withdraw(chain: ChainType, accountId: string, keyPair: KeyPair, contractId: string, amount: number) {
     const account = await fetchAccount(chain, this.network, this.env, accountId, keyPair, this.shardName, this.apiKey);
 
     const contract = new Contract(

@@ -17,6 +17,19 @@ export enum Environment {
     Production,
 }
 
+export enum ConnectorType {
+  FT,
+  NFT,
+  XSC,
+}
+
+export function connectorTypeToString(connectorType: ConnectorType): string {
+  if (connectorType === ConnectorType.FT) return "FT";
+  if (connectorType === ConnectorType.NFT) return "NFT";
+  if (connectorType === ConnectorType.XSC) return "XSC";
+  return "";
+}
+
 export function environmentToContractNameInfix(chain: Chain, env: Environment): string {
   if (chain === Chain.Near) {
     if (env === Environment.Development) return ".dev";

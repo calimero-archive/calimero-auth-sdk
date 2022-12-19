@@ -1,4 +1,4 @@
-import {Chain, Environment, Network} from "./Utils";
+import {Chain, ConnectorType, Environment, Network} from "./Utils";
 import {BalanceClient} from "./BalanceClient";
 import {KeyPair} from "near-api-js";
 import {ConnectorPermissions} from "./ConnectorPermissions";
@@ -76,52 +76,43 @@ export class Bridge {
 
   async canBridge(
     chain: Chain,
-    signerAccountId: string,
-    signerKeyPair: KeyPair,
     accountId: string,
-    connectorType: string
+    connectorType: ConnectorType
   ): Promise<boolean> {
-    const permissionsContract = await ConnectorPermissions.init(
+    const permissionsContract = await ConnectorPermissions.initForViewMethods(
       chain,
       this.shardName,
       this.env,
       this.network,
-      signerAccountId,
-      signerKeyPair,
       this.apiKey
     );
 
     return await permissionsContract.canBridge(accountId, connectorType);
   }
 
-  async denyBridge(
+  async getAllowRegexRules(
     chain: Chain,
-    signerAccountId: string,
-    signerKeyPair: KeyPair,
-    accountId: string,
-    connectorType: string
-  ): Promise<boolean> {
-    const permissionsContract = await ConnectorPermissions.init(
+    connectorType: ConnectorType
+  ): Promise<string[]> {
+    const permissionsContract = await ConnectorPermissions.initForViewMethods(
       chain,
       this.shardName,
       this.env,
       this.network,
-      signerAccountId,
-      signerKeyPair,
       this.apiKey
     );
 
-    return await permissionsContract.denyBridge(accountId, connectorType);
+    return await permissionsContract.getAllowRegexRules(connectorType);
   }
 
-  async allowBridge(
+  async addAllowRegexRule(
     chain: Chain,
     signerAccountId: string,
     signerKeyPair: KeyPair,
-    accountId: string,
-    connectorType: string
+    regexRule: string,
+    connectorType: ConnectorType
   ): Promise<boolean> {
-    const permissionsContract = await ConnectorPermissions.init(
+    const permissionsContract = await ConnectorPermissions.initForChangeMethods(
       chain,
       this.shardName,
       this.env,
@@ -131,7 +122,95 @@ export class Bridge {
       this.apiKey
     );
 
-    return await permissionsContract.allowBridge(accountId, connectorType);
+    return await permissionsContract.addAllowRegexRule(regexRule, connectorType);
+  }
+
+  async removeAllowedRegexRule(
+    chain: Chain,
+    signerAccountId: string,
+    signerKeyPair: KeyPair,
+    regexRule: string,
+    connectorType: ConnectorType
+  ): Promise<boolean> {
+    const permissionsContract = await ConnectorPermissions.initForChangeMethods(
+      chain,
+      this.shardName,
+      this.env,
+      this.network,
+      signerAccountId,
+      signerKeyPair,
+      this.apiKey
+    );
+
+    return await permissionsContract.removeAllowedRegexRule(regexRule, connectorType);
+  }
+
+  async denyCrossShardCallPerContract(
+    chain: Chain,
+    signerAccountId: string,
+    signerKeyPair: KeyPair,
+    accountRegex: string,
+    contractRegex: string
+  ): Promise<boolean> {
+    const permissionsContract = await ConnectorPermissions.initForChangeMethods(
+      chain,
+      this.shardName,
+      this.env,
+      this.network,
+      signerAccountId,
+      signerKeyPair,
+      this.apiKey
+    );
+
+    return await permissionsContract.denyCrossShardCallPerContract(accountRegex, contractRegex);
+  }
+
+  async removeDeniedCrossShardCallPerContract(
+    chain: Chain,
+    signerAccountId: string,
+    signerKeyPair: KeyPair,
+    accountRegex: string,
+    contractRegex: string
+  ): Promise<boolean> {
+    const permissionsContract = await ConnectorPermissions.initForChangeMethods(
+      chain,
+      this.shardName,
+      this.env,
+      this.network,
+      signerAccountId,
+      signerKeyPair,
+      this.apiKey
+    );
+
+    return await permissionsContract.removeDeniedCrossShardCallPerContract(accountRegex, contractRegex);
+  }
+
+  async canMakeCrossShardCallForContract(
+    chain: Chain,
+    accountId: string,
+    contractId: string
+  ): Promise<boolean> {
+    const permissionsContract = await ConnectorPermissions.initForViewMethods(
+      chain,
+      this.shardName,
+      this.env,
+      this.network,
+      this.apiKey
+    );
+
+    return await permissionsContract.canMakeCrossShardCallForContract(accountId, contractId);
+  }
+
+  async getRegexAccountPerContractForXsc(chain: Chain): Promise<[string, string][]> {
+    const permissionsContract = await ConnectorPermissions.initForViewMethods(
+      chain,
+      this.shardName,
+      this.env,
+      this.network,
+      this.apiKey
+    );
+
+    return await permissionsContract.getRegexAccountPerContractForXsc();
   }
 
   async ftTransferCall(

@@ -110,7 +110,8 @@ export class Bridge {
     signerAccountId: string,
     signerKeyPair: KeyPair,
     regexRule: string,
-    connectorType: ConnectorType
+    connectorType: ConnectorType,
+    attachedDeposit: string
   ): Promise<boolean> {
     const permissionsContract = await ConnectorPermissions.initForChangeMethods(
       chain,
@@ -122,7 +123,7 @@ export class Bridge {
       this.apiKey
     );
 
-    return await permissionsContract.addAllowRegexRule(regexRule, connectorType);
+    return await permissionsContract.addAllowRegexRule(regexRule, connectorType, attachedDeposit);
   }
 
   async removeAllowedRegexRule(
@@ -150,7 +151,8 @@ export class Bridge {
     signerAccountId: string,
     signerKeyPair: KeyPair,
     accountRegex: string,
-    contractRegex: string
+    contractRegex: string,
+    attachedDeposit: string
   ): Promise<boolean> {
     const permissionsContract = await ConnectorPermissions.initForChangeMethods(
       chain,
@@ -162,7 +164,7 @@ export class Bridge {
       this.apiKey
     );
 
-    return await permissionsContract.denyCrossShardCallPerContract(accountRegex, contractRegex);
+    return await permissionsContract.denyCrossShardCallPerContract(accountRegex, contractRegex, attachedDeposit);
   }
 
   async removeDeniedCrossShardCallPerContract(
@@ -201,7 +203,7 @@ export class Bridge {
     return await permissionsContract.canMakeCrossShardCallForContract(accountId, contractId);
   }
 
-  async getRegexAccountPerContractForXsc(chain: ChainType): Promise<[string, string][]> {
+  async getAccountPerContractDeniesForXsc(chain: ChainType): Promise<[string, string][]> {
     const permissionsContract = await ConnectorPermissions.initForViewMethods(
       chain,
       this.shardName,
@@ -210,7 +212,7 @@ export class Bridge {
       this.apiKey
     );
 
-    return await permissionsContract.getRegexAccountPerContractForXsc();
+    return await permissionsContract.getAccountPerContractDeniesForXsc();
   }
 
   async ftBridge(

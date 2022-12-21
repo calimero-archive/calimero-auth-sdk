@@ -11,6 +11,7 @@ import {
 } from "./Utils";
 import {CALIMERO_CONTRACT_SUFFIX, PERMISSIONS_CONTRACT_PREFIX} from "./Constants";
 import {getConnectionInfo} from "./NetworkConfig";
+import * as big from "bn.js";
 
 export class ConnectorPermissions {
 
@@ -96,11 +97,14 @@ export class ConnectorPermissions {
     return JSON.parse(Buffer.from(queryResponse.result).toString());
   }
 
-  async addAllowRegexRule(regexRule: string, connectorType: ConnectorType): Promise<boolean> {
+  async addAllowRegexRule(regexRule: string, connectorType: ConnectorType, attachedDeposit: string): Promise<boolean> {
     // @ts-ignore
     const result = await this.permissionsContract.add_allow_regex_rule({
-      regex_rule: regexRule,
-      connector_type: connectorTypeToString(connectorType),
+      args: {
+        regex_rule: regexRule,
+        connector_type: connectorTypeToString(connectorType),
+      },
+      amount: new big.BN(attachedDeposit)
     });
 
     return result;
@@ -116,11 +120,18 @@ export class ConnectorPermissions {
     return result;
   }
 
-  async denyCrossShardCallPerContract(accountRegex: string, contractRegex: string): Promise<boolean> {
+  async denyCrossShardCallPerContract(
+    accountRegex: string,
+    contractRegex: string,
+    attachedDeposit: string
+  ): Promise<boolean> {
     // @ts-ignore
     const result = await this.permissionsContract.deny_cross_shard_call_per_contract({
-      account_regex: accountRegex,
-      contract_regex: contractRegex,
+      args: {
+        account_regex: accountRegex,
+        contract_regex: contractRegex,
+      },
+      amount: new big.BN(attachedDeposit)
     });
 
     return result;
@@ -148,7 +159,7 @@ export class ConnectorPermissions {
     return JSON.parse(Buffer.from(queryResponse.result).toString());
   }
 
-  async getRegexAccountPerContractForXsc(): Promise<[string, string][]> {
+  async getAccountPerContractDeniesForXsc(): Promise<[string, string][]> {
     const args = "{}";
     const queryResponse = await callViewMethod(
       this.connectionInfo,

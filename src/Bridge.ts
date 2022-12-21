@@ -107,7 +107,6 @@ export class Bridge {
 
   async addAllowRegexRule(
     chain: ChainType,
-    signerAccountId: string,
     signerKeyPair: KeyPair,
     regexRule: string,
     connectorType: ConnectorType,
@@ -118,7 +117,7 @@ export class Bridge {
       this.shardName,
       this.env,
       this.network,
-      signerAccountId,
+      connectorType,
       signerKeyPair,
       this.apiKey
     );
@@ -128,7 +127,6 @@ export class Bridge {
 
   async removeAllowedRegexRule(
     chain: ChainType,
-    signerAccountId: string,
     signerKeyPair: KeyPair,
     regexRule: string,
     connectorType: ConnectorType
@@ -138,7 +136,7 @@ export class Bridge {
       this.shardName,
       this.env,
       this.network,
-      signerAccountId,
+      connectorType,
       signerKeyPair,
       this.apiKey
     );
@@ -148,7 +146,6 @@ export class Bridge {
 
   async denyCrossShardCallPerContract(
     chain: ChainType,
-    signerAccountId: string,
     signerKeyPair: KeyPair,
     accountRegex: string,
     contractRegex: string,
@@ -159,7 +156,7 @@ export class Bridge {
       this.shardName,
       this.env,
       this.network,
-      signerAccountId,
+      ConnectorType.XSC,
       signerKeyPair,
       this.apiKey
     );
@@ -169,7 +166,6 @@ export class Bridge {
 
   async removeDeniedCrossShardCallPerContract(
     chain: ChainType,
-    signerAccountId: string,
     signerKeyPair: KeyPair,
     accountRegex: string,
     contractRegex: string
@@ -179,7 +175,7 @@ export class Bridge {
       this.shardName,
       this.env,
       this.network,
-      signerAccountId,
+      ConnectorType.XSC,
       signerKeyPair,
       this.apiKey
     );

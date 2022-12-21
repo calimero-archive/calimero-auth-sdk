@@ -9,7 +9,13 @@ import {
   fetchAccount,
   NetworkType
 } from "./Utils";
-import {CALIMERO_CONTRACT_SUFFIX, PERMISSIONS_CONTRACT_PREFIX} from "./Constants";
+import {
+  CALIMERO_CONTRACT_SUFFIX,
+  FT_CONNECTOR_CONTRACT_PREFIX,
+  NFT_CONNECTOR_CONTRACT_PREFIX,
+  PERMISSIONS_CONTRACT_PREFIX,
+  XSC_CONNECTOR_CONTRACT_PREFIX
+} from "./Constants";
 import {getConnectionInfo} from "./NetworkConfig";
 import * as big from "bn.js";
 
@@ -39,20 +45,35 @@ export class ConnectorPermissions {
 
     return connectorPermissions;
   }
-  
+
+  static getConnectorAccount(
+    connector: ConnectorType,
+    shardName: string,
+    network: NetworkType,
+    envInfix: string
+  ): string {
+    let connectorPrefix = "";
+    if (connector === ConnectorType.FT) connectorPrefix = FT_CONNECTOR_CONTRACT_PREFIX;
+    if (connector === ConnectorType.NFT) connectorPrefix = NFT_CONNECTOR_CONTRACT_PREFIX;
+    if (connector === ConnectorType.XSC) connectorPrefix = XSC_CONNECTOR_CONTRACT_PREFIX;
+
+    return connectorPrefix + shardName + envInfix + CALIMERO_CONTRACT_SUFFIX;
+  }
+
   static async initForChangeMethods(
     chain: ChainType,
     shardName: string,
     env: Environment,
     network: NetworkType,
-    accountId: string,
+    connector: ConnectorType,
     keyPair: KeyPair,
     apiKey = ""
   ): Promise<ConnectorPermissions> {
 
-    const account = await fetchAccount(chain, network, env, accountId, keyPair, shardName, apiKey);
-
     const envInfix = environmentToContractNameInfix(chain, env);
+    const connectorAccountId = ConnectorPermissions.getConnectorAccount(connector, shardName, network, envInfix);
+    const account = await fetchAccount(chain, network, env, connectorAccountId, keyPair, shardName, apiKey);
+
     const contractId = PERMISSIONS_CONTRACT_PREFIX + shardName + envInfix + CALIMERO_CONTRACT_SUFFIX;
     const permissionsContract = new Contract(
       account,

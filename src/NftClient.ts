@@ -1,15 +1,15 @@
 import {Contract, KeyPair} from "near-api-js";
 import {CALIMERO_CONTRACT_SUFFIX, NFT_CONNECTOR_CONTRACT_PREFIX} from "./Constants";
-import {Chain, Environment, environmentToContractNameInfix, fetchAccount, Network} from "./Utils";
+import {ChainType, Environment, environmentToContractNameInfix, fetchAccount, NetworkType} from "./Utils";
 
 export class NftClient {
 
   shardName: string;
   env: Environment;
-  network: Network;
+  network: NetworkType;
   apiKey: string;
 
-  constructor(shardName: string, env: Environment, network: Network, apiKey = "")
+  constructor(shardName: string, env: Environment, network: NetworkType, apiKey = "")
   {
     this.shardName = shardName;
     this.env = env;
@@ -17,8 +17,8 @@ export class NftClient {
     this.apiKey = apiKey;
   }
 
-  async nftTransferCall(
-    chain: Chain,
+  async nftBridge(
+    chain: ChainType,
     accountId: string,
     keyPair: KeyPair,
     contractId: string,
@@ -58,7 +58,7 @@ export class NftClient {
     }
   }
 
-  async withdraw(chain: Chain, accountId: string, keyPair: KeyPair, contractId: string, tokenId: string) {
+  async withdraw(chain: ChainType, accountId: string, keyPair: KeyPair, contractId: string, tokenId: string) {
     const account = await fetchAccount(chain, this.network, this.env, accountId, keyPair, this.shardName, this.apiKey);
 
     const contract = new Contract(

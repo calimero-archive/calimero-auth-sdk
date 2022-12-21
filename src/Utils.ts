@@ -6,15 +6,15 @@ const { keyStores } = nearAPI;
 const { connect } = nearAPI;
 const {providers} = nearAPI;
 
-export enum Chain {
-  Near,
-  Calimero,
+export enum ChainType {
+  NEAR,
+  CALIMERO,
 }
 
 export enum Environment {
-    Development,
-    Staging,
-    Production,
+    DEVELOPMENT,
+    STAGING,
+    PRODUCTION,
 }
 
 export enum ConnectorType {
@@ -30,22 +30,22 @@ export function connectorTypeToString(connectorType: ConnectorType): string {
   return "";
 }
 
-export function environmentToContractNameInfix(chain: Chain, env: Environment): string {
-  if (chain === Chain.Near) {
-    if (env === Environment.Development) return ".dev";
-    if (env === Environment.Staging) return ".stage";
+export function environmentToContractNameInfix(chain: ChainType, env: Environment): string {
+  if (chain === ChainType.NEAR) {
+    if (env === Environment.DEVELOPMENT) return ".dev";
+    if (env === Environment.STAGING) return ".stage";
   }
   return "";
 }
 
-export enum Network {
-    Testnet,
-    Mainnet,
+export enum NetworkType {
+    TESTNET,
+    MAINNET,
 }
 
 export async function fetchAccount(
-  chain: Chain,
-  network: Network,
+  chain: ChainType,
+  network: NetworkType,
   env: Environment,
   accountId: string,
   keyPair: KeyPair,

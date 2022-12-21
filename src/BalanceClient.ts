@@ -1,11 +1,11 @@
-import {callViewMethod, Chain, Environment, Network} from "./Utils";
+import {callViewMethod, ChainType, Environment, NetworkType} from "./Utils";
 import {getConnectionInfo} from "./NetworkConfig";
 
 export class BalanceClient {
 
   static async ftBalanceOf(
-    chain: Chain,
-    network: Network,
+    chain: ChainType,
+    network: NetworkType,
     env: Environment,
     contractId: string,
     accountId: string,
@@ -21,8 +21,8 @@ export class BalanceClient {
   }
 
   static async getNftOwnerId(
-    chain: Chain,
-    network: Network,
+    chain: ChainType,
+    network: NetworkType,
     env: Environment,
     contractId: string,
     tokenId: string,
@@ -38,8 +38,8 @@ export class BalanceClient {
   }
 
   static async getNftTokensForOwner(
-    chain: Chain,
-    network: Network,
+    chain: ChainType,
+    network: NetworkType,
     env: Environment,
     contractId: string,
     accountId: string,

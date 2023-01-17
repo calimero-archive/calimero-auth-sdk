@@ -74,6 +74,24 @@ export class Bridge {
     return await lightClient.getCurrentBlockHeight(chain, this.apiKey);
   }
 
+  async resetPermissions(
+    chain: ChainType,
+    signerKeyPair: KeyPair,
+    connectorType: ConnectorType
+  ) {
+    const permissionsContract = await ConnectorPermissions.initForChangeMethods(
+      chain,
+      this.shardName,
+      this.env,
+      this.network,
+      connectorType,
+      signerKeyPair,
+      this.apiKey
+    );
+
+    await permissionsContract.resetPermissions(connectorType);
+  }
+
   async canBridge(
     chain: ChainType,
     accountId: string,

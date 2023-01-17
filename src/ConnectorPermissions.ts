@@ -81,6 +81,7 @@ export class ConnectorPermissions {
       {
         viewMethods: [],
         changeMethods: [
+          "reset_permissions",
           "add_allow_regex_rule",
           "remove_allowed_regex_rule",
           "deny_cross_shard_call_per_contract",
@@ -92,6 +93,15 @@ export class ConnectorPermissions {
     const connectorPermissions =  new ConnectorPermissions(contractId);
     connectorPermissions.permissionsContract = permissionsContract;
     return connectorPermissions;
+  }
+
+  async resetPermissions(connectorType: ConnectorType) {
+    // @ts-ignore
+    await this.permissionsContract.reset_permissions({
+      args: {
+        connector_type: connectorTypeToString(connectorType),
+      },
+    });
   }
 
   async canBridge(accountId: string, connectorType: ConnectorType): Promise<boolean> {

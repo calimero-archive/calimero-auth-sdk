@@ -13,7 +13,6 @@ module.exports = {
   },
   rules: {
     "@next/next/no-img-element": "off",
-    "function-call-argument-newline": ["error", "always"],
     "max-len": ["error", { code: 120 }],
     indent: ["error", 2, { SwitchCase: 1 }],
     quotes: ["error", "double"],
